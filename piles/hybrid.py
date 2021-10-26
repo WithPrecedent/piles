@@ -30,12 +30,14 @@ from collections.abc import (
 import dataclasses
 from typing import Any, Callable, ClassVar, Optional, Type, TypeVar, Union
 
+import bunches
+
 from . import base
 from . import check
-from . import bunch
+ 
  
 @dataclasses.dataclass # type: ignore
-class Pipeline(bunch.Hybrid, base.Composite, abc.ABC):
+class Pipeline(bunches.Hybrid, base.Composite, abc.ABC):
     """Base class for pipeline data structures.
     
     Args:
@@ -54,7 +56,7 @@ class Pipeline(bunch.Hybrid, base.Composite, abc.ABC):
      
  
 @dataclasses.dataclass # type: ignore
-class Pipelines(bunch.Lexicon, base.Composite, abc.ABC):
+class Pipelines(bunches.Dictionary, base.Composite, abc.ABC):
     """Base class a collection of Pipeline instances.
         
     Args:

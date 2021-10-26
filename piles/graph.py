@@ -36,12 +36,13 @@ import itertools
 from typing import (
     Any, Callable, ClassVar, Optional, Type, TypeVar, TYPE_CHECKING, Union)
 
+import bunches
+
 from . import utilities
 from . import base
-from . import bunch
 from . import check
 from . import convert
-from . import manifest
+from . import hybrid
 
 if TYPE_CHECKING:
     from . import array
@@ -104,7 +105,7 @@ class Graph(base.Composite, abc.ABC):
 
 
 @dataclasses.dataclass
-class Adjacency(bunch.Lexicon, Graph):
+class Adjacency(bunches.Dictionary, Graph):
     """Base class for adjacency-list-based graphs.
     
     Args:
@@ -217,16 +218,16 @@ class System(Adjacency):
         return self._find_all_paths(starts = self.root, stops = self.endpoint)
     
     @property
-    def pipeline(self) -> manifest.Pipeline:
-        """Returns stored graph as a manifest.Pipeline."""
+    def pipeline(self) -> hybrid.Pipeline:
+        """Returns stored graph as a hybrid.Pipeline."""
         raise NotImplementedError
     
     @property
-    def pipelines(self) -> manifest.Pipelines:
-        """Returns stored graph as a manifest.Pipelines."""
+    def pipelines(self) -> hybrid.Pipelines:
+        """Returns stored graph as a hybrid.Pipelines."""
         all_paths = self.paths
-        instances = [manifest.Process(contents = p) for p in all_paths]
-        return manifest.Processes(contents = instances)
+        instances = [hybrid.Process(contents = p) for p in all_paths]
+        return hybrid.Processes(contents = instances)
             
     @property
     def tree(self) -> tree.Tree:
@@ -257,14 +258,14 @@ class System(Adjacency):
         return cls(contents = new_contents)
 
     @classmethod
-    def from_pipeline(cls, item: manifest.Pipeline) -> System:
-        """Creates a System instance from a manifest.Pipeline."""
+    def from_pipeline(cls, item: hybrid.Pipeline) -> System:
+        """Creates a System instance from a hybrid.Pipeline."""
         new_contents = convert.pipeline_to_adjacency(item = item)
         return cls(contents = new_contents)
     
     @classmethod
-    def from_pipelines(cls, item: manifest.Pipelines) -> System:
-        """Creates a System instance from a manifest.Pipeline."""
+    def from_pipelines(cls, item: hybrid.Pipelines) -> System:
+        """Creates a System instance from a hybrid.Pipeline."""
         new_contents = convert.pipelines_to_adjacency(item = item)
         return cls(contents = new_contents)
 
@@ -348,8 +349,8 @@ class System(Adjacency):
                     self.connect(start = endpoint, stop = root)
         else:
             raise TypeError(
-                'item must be a System, Adjacency, Edges, Matrix, manifest.Pipeline, '
-                'manifest.Pipelines, or Node type')
+                'item must be a System, Adjacency, Edges, Matrix, hybrid.Pipeline, '
+                'hybrid.Pipelines, or Node type')
         return
   
     def connect(self, start: base.Node, stop: base.Node) -> None:
@@ -439,8 +440,8 @@ class System(Adjacency):
             adjacency = {item: set()}
         else:
             raise TypeError(
-                'item must be a System, Adjacency, Edges, Matrix, manifest.Pipeline, '
-                'manifest.Pipelines, or Node type')
+                'item must be a System, Adjacency, Edges, Matrix, hybrid.Pipeline, '
+                'hybrid.Pipelines, or Node type')
         self.contents.update(adjacency)
         return
 
@@ -468,8 +469,8 @@ class System(Adjacency):
                     self.connect(start = endpoint, stop = root)
         else:
             raise TypeError(
-                'item must be a System, Adjacency, Edges, Matrix, manifest.Pipeline, '
-                'manifest.Pipelines, or Node type')
+                'item must be a System, Adjacency, Edges, Matrix, hybrid.Pipeline, '
+                'hybrid.Pipelines, or Node type')
         return
       
     def subset(
@@ -511,7 +512,7 @@ class System(Adjacency):
         self, 
         start: base.Node,
         stop: base.Node, 
-        path: Optional[manifest.Pipeline] = None) -> manifest.Pipeline:
+        path: Optional[hybrid.Pipeline] = None) -> hybrid.Pipeline:
         """Returns all paths in graph from 'start' to 'stop'.
 
         The code here is adapted from: https://www.python.org/doc/essays/graphs/
@@ -519,11 +520,11 @@ class System(Adjacency):
         Args:
             start (base.Node): node to start paths from.
             stop (base.Node): node to stop paths.
-            path (manifest.Pipeline): a path from 'start' to 'stop'. Defaults 
+            path (hybrid.Pipeline): a path from 'start' to 'stop'. Defaults 
                 to an empty list. 
 
         Returns:
-            manifest.Pipeline: a list of possible paths (each path is a list 
+            hybrid.Pipeline: a list of possible paths (each path is a list 
                 nodes) from 'start' to 'stop'.
             
         """
@@ -550,7 +551,7 @@ class System(Adjacency):
     def _find_all_paths(
         self, 
         starts: base.Nodes, 
-        stops: base.Nodes) -> manifest.Pipeline:
+        stops: base.Nodes) -> hybrid.Pipeline:
         """Returns all paths between 'starts' and 'stops'.
 
         Args:
@@ -560,7 +561,7 @@ class System(Adjacency):
                 System.
 
         Returns:
-            manifest.Pipeline: list of all paths through the System from all 
+            hybrid.Pipeline: list of all paths through the System from all 
                 'starts' to all 'ends'.
             
         """
@@ -582,7 +583,7 @@ class System(Adjacency):
     
 #     Graph stores a directed acyclic graph (DAG) as an adjacency list. Despite 
 #     being called an adjacency "list," the typical and most efficient way to 
-#     store one is using a python dict. a piles Graph inherits from a Lexicon 
+#     store one is using a python dict. a piles Graph inherits from a Dictionary 
 #     in order to allow use of its extra functionality over a plain dict.
     
 #     Graph supports '+' and '+=' to be used to join two piles Graph instances. A
@@ -608,11 +609,11 @@ class System(Adjacency):
 #         return matrix_to_adjacency(item = self.contents)
 
 #     @property
-#     def breadths(self) -> manifest.Pipeline:
+#     def breadths(self) -> hybrid.Pipeline:
 #         """Returns all paths through the Graph using breadth-first search.
         
 #         Returns:
-#             manifest.Pipeline: returns all paths from 'roots' to 'endpoints' in a list 
+#             hybrid.Pipeline: returns all paths from 'roots' to 'endpoints' in a list 
 #                 of lists of nodes.
                 
 #         """
@@ -622,11 +623,11 @@ class System(Adjacency):
 #             depth_first = False)
 
 #     @property
-#     def depths(self) -> manifest.Pipeline:
+#     def depths(self) -> hybrid.Pipeline:
 #         """Returns all paths through the Graph using depth-first search.
         
 #         Returns:
-#             manifest.Pipeline: returns all paths from 'roots' to 'endpoints' in a list 
+#             hybrid.Pipeline: returns all paths from 'roots' to 'endpoints' in a list 
 #                 of lists of nodes.
                 
 #         """
@@ -756,11 +757,11 @@ class System(Adjacency):
 #         return cls(contents = matrix_to_adjacency(item = matrix))
     
 #     @classmethod
-#     def from_pipeline(cls, pipeline: manifest.Pipeline) -> Graph:
-#         """Creates a Graph instance from a manifest.Pipeline.
+#     def from_pipeline(cls, pipeline: hybrid.Pipeline) -> Graph:
+#         """Creates a Graph instance from a hybrid.Pipeline.
 
 #         Args:
-#             pipeline (manifest.Pipeline): serial pipeline used to create a Graph
+#             pipeline (hybrid.Pipeline): serial pipeline used to create a Graph
 #                 instance.
  
 #         Returns:
@@ -985,8 +986,8 @@ class System(Adjacency):
 #     def walk(self, 
 #              start: base.Node, 
 #              stop: base.Node, 
-#              path: manifest.Pipeline = None,
-#              depth_first: bool = True) -> manifest.Pipeline:
+#              path: hybrid.Pipeline = None,
+#              depth_first: bool = True) -> hybrid.Pipeline:
 #         """Returns all paths in graph from 'start' to 'stop'.
 
 #         The code here is adapted from: https://www.python.org/doc/essays/graphs/
@@ -994,11 +995,11 @@ class System(Adjacency):
 #         Args:
 #             start (base.Node): node to start paths from.
 #             stop (base.Node): node to stop paths.
-#             path (manifest.Pipeline): a path from 'start' to 'stop'. Defaults to an 
+#             path (hybrid.Pipeline): a path from 'start' to 'stop'. Defaults to an 
 #                 empty list. 
 
 #         Returns:
-#             manifest.Pipeline: a list of possible paths (each path is a list 
+#             hybrid.Pipeline: a list of possible paths (each path is a list 
 #                 nodes) from 'start' to 'stop'.
             
 #         """
@@ -1045,14 +1046,14 @@ class System(Adjacency):
 #                 visited.add(connected)   
 #         return []
 
-#     def _breadth_first_search(self, node: base.Node) -> manifest.Pipeline:
+#     def _breadth_first_search(self, node: base.Node) -> hybrid.Pipeline:
 #         """Returns a breadth first search path through the Graph.
 
 #         Args:
 #             node (base.Node): node to start the search from.
 
 #         Returns:
-#             manifest.Pipeline: nodes in a path through the Graph.
+#             hybrid.Pipeline: nodes in a path through the Graph.
             
 #         """        
 #         visited = set()
@@ -1066,7 +1067,7 @@ class System(Adjacency):
        
 #     def _depth_first_search(self, 
 #         node: base.Node, 
-#         visited: list[base.Node]) -> manifest.Pipeline:
+#         visited: list[base.Node]) -> hybrid.Pipeline:
 #         """Returns a depth first search path through the Graph.
 
 #         Args:
@@ -1074,7 +1075,7 @@ class System(Adjacency):
 #             visited (list[base.Node]): list of visited nodes.
 
 #         Returns:
-#             manifest.Pipeline: nodes in a path through the Graph.
+#             hybrid.Pipeline: nodes in a path through the Graph.
             
 #         """  
 #         if node not in visited:
@@ -1086,7 +1087,7 @@ class System(Adjacency):
 #     def _find_all_paths(self, 
 #         starts: Union[base.Node, Sequence[base.Node]],
 #         stops: Union[base.Node, Sequence[base.Node]],
-#         depth_first: bool = True) -> manifest.Pipeline:
+#         depth_first: bool = True) -> hybrid.Pipeline:
 #         """[summary]
 
 #         Args:
@@ -1096,7 +1097,7 @@ class System(Adjacency):
 #                 through the Graph.
 
 #         Returns:
-#             manifest.Pipeline: list of all paths through the Graph from all
+#             hybrid.Pipeline: list of all paths through the Graph from all
 #                 'starts' to all 'ends'.
             
 #         """

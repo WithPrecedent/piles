@@ -17,10 +17,7 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    Proxy (Container): basic wrapper for a stored python object. Dunder methods 
-        attempt to intelligently apply access methods to either the wrapper or 
-        the wrapped item.   
-    Bunch
+
           
 To Do:
     Integrate ashford Kinds system when it is finished.
@@ -45,8 +42,8 @@ from . import utilities
 if TYPE_CHECKING:
     from . import bunch
     from . import graph
-    from . import manifest
-    from . import proxy
+    from . import hybrid
+    from . import vertex
     from . import tree  
 
            
@@ -67,12 +64,12 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
     """ Required Subclass Properties """
         
     @abc.abstractproperty
-    def endpoint(self) -> Optional[Union[proxy.Node, proxy.Nodes]]:
+    def endpoint(self) -> Optional[Union[vertex.Node, vertex.Nodes]]:
         """Returns the endpoint(s) of the stored composite object."""
         pass
  
     @abc.abstractproperty
-    def root(self) -> Optional[Union[proxy.Node, proxy.Nodes]]:
+    def root(self) -> Optional[Union[vertex.Node, vertex.Nodes]]:
         """Returns the root(s) of the stored composite object."""
         pass
 
@@ -92,18 +89,18 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
         pass
        
     @abc.abstractproperty
-    def nodes(self) -> proxy.Nodes:
-        """Returns the stored composite object as a proxy.Nodes."""
+    def nodes(self) -> vertex.Nodes:
+        """Returns the stored composite object as a vertex.Nodes."""
         pass
         
     @abc.abstractproperty
-    def pipeline(self) -> manifest.Pipeline:
-        """Returns the stored composite object as a manifest.Pipeline."""
+    def pipeline(self) -> hybrid.Pipeline:
+        """Returns the stored composite object as a hybrid.Pipeline."""
         pass
         
     @abc.abstractproperty
-    def pipelines(self) -> manifest.Pipelines:
-        """Returns the stored composite object as a manifest.Pipelines."""
+    def pipelines(self) -> hybrid.Pipelines:
+        """Returns the stored composite object as a hybrid.Pipelines."""
         pass
             
     @abc.abstractproperty
@@ -129,13 +126,13 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
         pass
     
     @abc.abstractclassmethod
-    def from_pipeline(cls, item: manifest.Pipeline) -> Composite:
-        """Creates a Composite instance from a manifest.Pipeline."""
+    def from_pipeline(cls, item: hybrid.Pipeline) -> Composite:
+        """Creates a Composite instance from a hybrid.Pipeline."""
         pass
     
     @abc.abstractclassmethod
-    def from_pipelines(cls, item: manifest.Pipelines) -> Composite:
-        """Creates a Composite instance from a manifest.Pipelines."""
+    def from_pipelines(cls, item: hybrid.Pipelines) -> Composite:
+        """Creates a Composite instance from a hybrid.Pipelines."""
         pass
 
     @abc.abstractclassmethod
@@ -146,24 +143,24 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
     """ Required Subclass Methods """
     
     @abc.abstractmethod
-    def add(item: proxy.Node, *args: Any, **kwargs: Any) -> None:
+    def add(item: vertex.Node, *args: Any, **kwargs: Any) -> None:
         """Adds 'node' to the stored composite object.
         
         Args:
-            node (proxy.Node): a node to add to the stored composite object.
+            node (vertex.Node): a node to add to the stored composite object.
                 
         """
         pass
     
     @abc.abstractmethod
     def append(
-        self, item: Union[proxy.Node, Composite], 
+        self, item: Union[vertex.Node, Composite], 
         *args: Any, 
         **kwargs: Any) -> None:
         """Appends 'item' to the endpoint(s) of the stored composite object.
 
         Args:
-            item (Union[proxy.Node, Composite]): a single Node or other Composite
+            item (Union[vertex.Node, Composite]): a single Node or other Composite
                 object to add to the stored composite object.
                 
         """
@@ -196,13 +193,13 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
     @abc.abstractmethod
     def prepend(
         self, 
-        item: Union[proxy.Node, Composite], 
+        item: Union[vertex.Node, Composite], 
         *args: Any, 
         **kwargs: Any) -> None:
         """Prepends 'item' to the root(s) of the stored composite object.
 
         Args:
-            item (Union[Node, Composite]): a single proxy.Node or other Composite
+            item (Union[Node, Composite]): a single vertex.Node or other Composite
                 object to add to the stored composite object.
                 
         """
@@ -232,33 +229,33 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
     @abc.abstractmethod
     def walk(
         self, 
-        start: Optional[proxy.Node] = None,
-        stop: Optional[proxy.Node] = None, 
-        path: Optional[manifest.Pipeline] = None,
+        start: Optional[vertex.Node] = None,
+        stop: Optional[vertex.Node] = None, 
+        path: Optional[hybrid.Pipeline] = None,
         return_pipelines: bool = True, 
         *args: Any, 
-        **kwargs: Any) -> Union[manifest.Pipeline, manifest.Pipelines]:
+        **kwargs: Any) -> Union[hybrid.Pipeline, hybrid.Pipelines]:
         """Returns path in the stored composite object from 'start' to 'stop'.
         
         Args:
-            start (Optional[proxy.Node]): node to start paths from. Defaults to None.
+            start (Optional[vertex.Node]): node to start paths from. Defaults to None.
                 If it is None, 'start' should be assigned to one of the roots
                 of the Composite.
-            stop (Optional[proxy.Node]): node to stop paths. Defaults to None. If it 
+            stop (Optional[vertex.Node]): node to stop paths. Defaults to None. If it 
                 is None, 'start' should be assigned to one of the roots of the 
                 Composite.
-            path (Optional[manifest.Pipeline]): a path from 'start' to 'stop'. Defaults 
+            path (Optional[hybrid.Pipeline]): a path from 'start' to 'stop'. Defaults 
                 to None. This parameter is used by recursive methods for 
                 determining a path.
-            return_pipelines (bool): whether to return a manifest.Pipelines instance 
-                (True) or a manifest.Pipeline instance (False). Defaults to True.
+            return_pipelines (bool): whether to return a hybrid.Pipelines instance 
+                (True) or a hybrid.Pipeline instance (False). Defaults to True.
 
         Returns:
-            Union[manifest.Pipeline, manifest.Pipelines]: path(s) through the Composite object. If 
+            Union[hybrid.Pipeline, hybrid.Pipelines]: path(s) through the Composite object. If 
                 multiple paths are possible and 'return_pipelines' is False, 
-                this method should return a manifest.Pipeline that includes all such 
+                this method should return a hybrid.Pipeline that includes all such 
                 paths appended to each other. If multiple paths are possible and
-                'return_pipelines' is True, a manifest.Pipelines instance with all of the
+                'return_pipelines' is True, a hybrid.Pipelines instance with all of the
                 paths should be returned. Defaults to True.
                             
         """

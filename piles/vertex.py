@@ -1,5 +1,5 @@
 """
-proxy: wrapper classes and relted functions
+vertex: wrapper classes and relted functions
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2021, Corey Rayburn Yung
 License: Apache-2.0
@@ -17,7 +17,7 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    Node (base.Proxy)
+    Node (object)
     nodify (Callable)
 
 ToDo:
@@ -31,20 +31,17 @@ import dataclasses
 import inspect
 from typing import Any, Optional, Type, Union
 
-from . import base
+import bunches
+
 from . import check
 from . import utilities
 
    
 @dataclasses.dataclass
-class Node(base.Proxy):
+class Node(object):
     """Vertex wrapper to provide hashability to any object.
     
     Node acts a basic wrapper for any item stored in a composite structure.
-    
-    By inheriting from Proxy, a Node will act as a pass-through class for access
-    methods seeking attributes not in a Node instance but rather stored in 
-    'contents'.
     
     Args:
         contents (Optional[Any]): any stored item(s). Defaults to None.
@@ -233,7 +230,7 @@ class Node(base.Proxy):
 
  
 @dataclasses.dataclass
-class Nodes(base.Bunch, abc.ABC):
+class Nodes(bunches.Bunch, abc.ABC):
     """Collection of nodes.
     
     Nodes are not guaranteed to be in order. 

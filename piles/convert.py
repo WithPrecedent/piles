@@ -39,8 +39,8 @@ from . import check
    
 if TYPE_CHECKING:
     from . import graph
-    from . import manifest
-    from . import proxy
+    from . import hybrid
+    from . import vertex
     from . import tree
     
 """ Converters """
@@ -115,11 +115,11 @@ def matrix_to_adjacency(item: graph.Matrix) -> graph.Adjacency:
     return adjacency
 
 # @to_adjacency.register # type: ignore 
-def pipeline_to_adjacency(item: manifest.Pipeline) -> graph.Adjacency:
+def pipeline_to_adjacency(item: hybrid.Pipeline) -> graph.Adjacency:
     """Converts 'item' to an graph.Adjacency.
 
     Args:
-        item (manifest.Pipeline): item to convert to an graph.Adjacency.
+        item (hybrid.Pipeline): item to convert to an graph.Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -137,11 +137,11 @@ def pipeline_to_adjacency(item: manifest.Pipeline) -> graph.Adjacency:
     return adjacency
 
 # @to_adjacency.register # type: ignore 
-def pipelines_to_adjacency(item: manifest.Pipelines) -> graph.Adjacency:
+def pipelines_to_adjacency(item: hybrid.Pipelines) -> graph.Adjacency:
     """Converts 'item' to an graph.Adjacency.
 
     Args:
-        item (manifest.Pipelines): item to convert to an graph.Adjacency.
+        item (hybrid.Pipelines): item to convert to an graph.Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -166,11 +166,11 @@ def tree_to_adjacency(item: tree.Tree) -> graph.Adjacency:
     raise NotImplementedError
              
 # @to_adjacency.register # type: ignore 
-def nodes_to_adjacency(item: proxy.Nodes) -> graph.Adjacency:
+def nodes_to_adjacency(item: vertex.Nodes) -> graph.Adjacency:
     """Converts 'item' to an graph.Adjacency.
 
     Args:
-        item (proxy.Nodes): item to convert to an graph.Adjacency.
+        item (vertex.Nodes): item to convert to an graph.Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.

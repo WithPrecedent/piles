@@ -29,20 +29,21 @@ from collections.abc import MutableSequence, Sequence
 import dataclasses
 from typing import Any, Callable, ClassVar, Optional, Type, TypeVar, Union
 
+import bunches
+
 from . import base
-from . import bunch
-from . import proxy
+from . import vertex
 from . import utilities
 
 
 """ Type Aliases """
 
-Changer: Type[Any] = Callable[[proxy.Node], None]
-Finder: Type[Any] = Callable[[proxy.Node], Optional[proxy.Node]]
+Changer: Type[Any] = Callable[[vertex.Node], None]
+Finder: Type[Any] = Callable[[vertex.Node], Optional[vertex.Node]]
 
 
 @dataclasses.dataclass # type: ignore
-class Tree(bunch.Hybrid, base.Composite, abc.ABC):
+class Tree(bunches.Hybrid, base.Composite, abc.ABC):
     """Base class for an tree data structures.
     
     The Tree class uses a Hybrid instead of a linked list for storing children
@@ -170,7 +171,7 @@ class Categorizer(Tree):
     """Base class for an tree data structures.
         
     Args:
-        contents (MutableSequence[proxy.Node]): list of stored Node 
+        contents (MutableSequence[vertex.Node]): list of stored Node 
             instances (including other Trees). Defaults to an empty list.
         name (Optional[str]): name of Tree node which should match a parent 
             tree's key name corresponding to this Tree node. All nodes in a Tree
@@ -180,7 +181,7 @@ class Categorizer(Tree):
         parent (Optional[Tree]): parent Tree, if any. Defaults to None.
         
     """
-    contents: MutableSequence[proxy.Node] = dataclasses.field(
+    contents: MutableSequence[vertex.Node] = dataclasses.field(
         default_factory = list)
     name: Optional[str] = None
     parent: Optional[Tree] = None 
@@ -193,11 +194,11 @@ class Categorizer(Tree):
         return self.nodes - self.leaves
     
     @property
-    def children(self) -> dict[str, proxy.Node]:
+    def children(self) -> dict[str, vertex.Node]:
         """[summary]
 
         Returns:
-            dict[str, proxy.Node]: [description]
+            dict[str, vertex.Node]: [description]
         """
         return self.contents
     
@@ -220,7 +221,7 @@ class Categorizer(Tree):
         return self.parent is None
     
     @property
-    def leaves(self) -> list[proxy.Node]:
+    def leaves(self) -> list[vertex.Node]:
         """Returns all stored leaf nodes in a list."""
         matches = []
         for node in self.nodes:
@@ -229,7 +230,7 @@ class Categorizer(Tree):
         return matches
      
     @property
-    def nodes(self) -> list[proxy.Node]:
+    def nodes(self) -> list[vertex.Node]:
         """Returns all stored nodes in a list."""
         return depth_first_search(tree = self.contents)
 
@@ -249,7 +250,7 @@ class Categorizer(Tree):
     
     def add(
         self, 
-        item: Union[proxy.Node, Sequence[proxy.Node]],
+        item: Union[vertex.Node, Sequence[vertex.Node]],
         parent: Optional[str] = None) -> None:
         """Adds node(s) in item to 'contents'.
         
@@ -257,7 +258,7 @@ class Categorizer(Tree):
         node(s) is set to this Tree instance.
 
         Args:
-            item (Union[proxy.Node, Sequence[proxy.Node]]): node(s) to 
+            item (Union[vertex.Node, Sequence[vertex.Node]]): node(s) to 
                 add to the 'contents' attribute.
 
         Raises:
@@ -284,18 +285,18 @@ class Categorizer(Tree):
             parent_node.contents.append(item)
         return
     
-    def find(self, finder: Finder, **kwargs: Any) -> Optional[proxy.Node]:
+    def find(self, finder: Finder, **kwargs: Any) -> Optional[vertex.Node]:
         """Finds first matching node in Tree using 'finder'.
 
         Args:
-            finder (Callable[[proxy.Node], Optional[proxy.Node]]): 
+            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
 
         Returns:
-            Optional[proxy.Node]: matching Node or None if no matching node 
+            Optional[vertex.Node]: matching Node or None if no matching node 
                 is found.
             
         """                  
@@ -308,15 +309,15 @@ class Categorizer(Tree):
     def find_add(
         self, 
         finder: Finder, 
-        item: proxy.Node, 
+        item: vertex.Node, 
         **kwargs: Any) -> None:
         """Finds first matching node in Tree using 'finder'.
 
         Args:
-            finder (Callable[[proxy.Node], Optional[proxy.Node]]): 
+            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
-            item (proxy.Node): node to add to the 'contents' attribute of 
+            item (vertex.Node): node to add to the 'contents' attribute of 
                 the first node that meets criteria in 'finder'.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
@@ -325,7 +326,7 @@ class Categorizer(Tree):
             ValueError: if no matching node is found by 'finder'.
 
         Returns:
-            Optional[proxy.Node]: matching Node or None if no matching node 
+            Optional[vertex.Node]: matching Node or None if no matching node 
                 is found.
             
         """  
@@ -338,18 +339,18 @@ class Categorizer(Tree):
                 'finder')
         return
     
-    def find_all(self, finder: Finder, **kwargs: Any) -> list[proxy.Node]:
+    def find_all(self, finder: Finder, **kwargs: Any) -> list[vertex.Node]:
         """Finds all matching nodes in Tree using 'finder'.
 
         Args:
-            finder (Callable[[proxy.Node], Optional[proxy.Node]]): 
+            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
 
         Returns:
-            list[proxy.Node]: matching nodes or an empty list if no 
+            list[vertex.Node]: matching nodes or an empty list if no 
                 matching node is found.
             
         """              
@@ -368,10 +369,10 @@ class Categorizer(Tree):
         """Finds matching nodes in Tree using 'finder' and applies 'changer'.
 
         Args:
-            finder (Callable[[proxy.Node], Optional[proxy.Node]]): 
+            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
-            changer (Callable[[proxy.Node], None]): function or other 
+            changer (Callable[[vertex.Node], None]): function or other 
                 callable that modifies the found node.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
@@ -390,14 +391,14 @@ class Categorizer(Tree):
                 'found by finder')
         return
     
-    def get(self, item: str) -> Optional[proxy.Node]:
+    def get(self, item: str) -> Optional[vertex.Node]:
         """Finds first matching node in Tree match 'item'.
 
         Args:
             item (str): 
 
         Returns:
-            Optional[proxy.Node]: matching Node or None if no matching node 
+            Optional[vertex.Node]: matching Node or None if no matching node 
                 is found.
             
         """                  

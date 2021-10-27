@@ -3,6 +3,10 @@ name = "piles"
 version = "0.1.0"
 description = "lightweight, flexible, extensible python composite data structures"
 authors = ["Corey Rayburn Yung <coreyrayburnyung@gmail.com>"]
+license = "Apache"
+readme = "README.md"
+homepage = "https://github.com/WithPrecedent/piles"
+repository = "https://github.com/WithPrecedent/piles"
 
 [tool.poetry.dependencies]
 python = "^3.9"

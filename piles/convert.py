@@ -1,5 +1,5 @@
 """
-composites: base classes and functions for lightweight composite data structures
+convert: functions to convert data between composite structures
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2021, Corey Rayburn Yung
 License: Apache-2.0
@@ -27,11 +27,9 @@ To Do:
 from __future__ import annotations
 import abc
 import collections
-from collections.abc import (
-    Collection, Hashable, MutableMapping, MutableSequence, Sequence, Set)
+from collections.abc import Collection
 import dataclasses
-from typing import (
-    Any, Callable, ClassVar, Optional, Type, TYPE_CHECKING, TypeVar, Union)
+from typing import Any, TYPE_CHECKING
 
 import more_itertools
 
@@ -40,17 +38,16 @@ from . import check
 if TYPE_CHECKING:
     from . import graph
     from . import hybrid
-    from . import vertex
     from . import tree
     
 """ Converters """
 
 # @amos.dispatcher 
 def to_adjacency(item: Any) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
     
     Args:
-        item (Any): item to convert to an graph.Adjacency.
+        item (Any): item to convert to an Adjacency.
 
     Raises:
         TypeError: if 'item' is a type that is not registered with the 
@@ -69,10 +66,10 @@ def to_adjacency(item: Any) -> graph.Adjacency:
 
 # @to_adjacency.register # type: ignore
 def edges_to_adjacency(item: graph.Edges) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (graph.Edges): item to convert to an graph.Adjacency.
+        item (graph.Edges): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -90,10 +87,10 @@ def edges_to_adjacency(item: graph.Edges) -> graph.Adjacency:
 
 # @to_adjacency.register # type: ignore 
 def matrix_to_adjacency(item: graph.Matrix) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (graph.Matrix): item to convert to an graph.Adjacency.
+        item (graph.Matrix): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -116,10 +113,10 @@ def matrix_to_adjacency(item: graph.Matrix) -> graph.Adjacency:
 
 # @to_adjacency.register # type: ignore 
 def pipeline_to_adjacency(item: hybrid.Pipeline) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (hybrid.Pipeline): item to convert to an graph.Adjacency.
+        item (hybrid.Pipeline): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -138,10 +135,10 @@ def pipeline_to_adjacency(item: hybrid.Pipeline) -> graph.Adjacency:
 
 # @to_adjacency.register # type: ignore 
 def pipelines_to_adjacency(item: hybrid.Pipelines) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (hybrid.Pipelines): item to convert to an graph.Adjacency.
+        item (hybrid.Pipelines): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -154,10 +151,10 @@ def pipelines_to_adjacency(item: hybrid.Pipelines) -> graph.Adjacency:
 
 # @to_adjacency.register # type: ignore 
 def tree_to_adjacency(item: tree.Tree) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (tree.Tree): item to convert to an graph.Adjacency.
+        item (tree.Tree): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -166,11 +163,11 @@ def tree_to_adjacency(item: tree.Tree) -> graph.Adjacency:
     raise NotImplementedError
              
 # @to_adjacency.register # type: ignore 
-def nodes_to_adjacency(item: vertex.Nodes) -> graph.Adjacency:
-    """Converts 'item' to an graph.Adjacency.
+def nodes_to_adjacency(item: base.Nodes) -> graph.Adjacency:
+    """Converts 'item' to an Adjacency.
 
     Args:
-        item (vertex.Nodes): item to convert to an graph.Adjacency.
+        item (base.Nodes): item to convert to an Adjacency.
 
     Returns:
         graph.Adjacency: derived from 'item'.
@@ -181,10 +178,10 @@ def nodes_to_adjacency(item: vertex.Nodes) -> graph.Adjacency:
 
 # @amos.dispatcher   
 def to_edges(item: Any) -> graph.Edges:
-    """Converts 'item' to an graph.Edges.
+    """Converts 'item' to an Edges.
     
     Args:
-        item (Any): item to convert to an graph.Edges.
+        item (Any): item to convert to an Edges.
 
     Raises:
         TypeError: if 'item' is a type that is not registered.
@@ -202,10 +199,10 @@ def to_edges(item: Any) -> graph.Edges:
     
 # @to_edges.register # type: ignore
 def adjacency_to_edges(item: graph.Adjacency) -> graph.Edges:
-    """Converts 'item' to an graph.Edges.
+    """Converts 'item' to an Edges.
     
     Args:
-        item (graph.Adjacency): item to convert to an graph.Edges.
+        item (graph.Adjacency): item to convert to an Edges.
 
     Returns:
         graph.Edges: derived from 'item'.
@@ -219,10 +216,10 @@ def adjacency_to_edges(item: graph.Adjacency) -> graph.Edges:
 
 # @amos.dispatcher   
 def to_matrix(item: Any) -> graph.Matrix:
-    """Converts 'item' to a graph.Matrix.
+    """Converts 'item' to a Matrix.
     
     Args:
-        item (Any): item to convert to a graph.Matrix.
+        item (Any): item to convert to a Matrix.
 
     Raises:
         TypeError: if 'item' is a type that is not registered.
@@ -240,10 +237,10 @@ def to_matrix(item: Any) -> graph.Matrix:
 
 # @to_matrix.register # type: ignore 
 def adjacency_to_matrix(item: graph.Adjacency) -> graph.Matrix:
-    """Converts 'item' to a graph.Matrix.
+    """Converts 'item' to a Matrix.
     
     Args:
-        item (graph.Adjacency): item to convert to a graph.Matrix.
+        item (graph.Adjacency): item to convert to a Matrix.
 
     Returns:
         graph.Matrix: derived from 'item'.
@@ -259,10 +256,10 @@ def adjacency_to_matrix(item: graph.Adjacency) -> graph.Matrix:
 
 # @amos.dispatcher   
 def to_tree(item: Any) -> tree.Tree:
-    """Converts 'item' to a tree.Tree.
+    """Converts 'item' to a Tree.
     
     Args:
-        item (Any): item to convert to a tree.Tree.
+        item (Any): item to convert to a Tree.
 
     Raises:
         TypeError: if 'item' is a type that is not registered.
@@ -280,10 +277,10 @@ def to_tree(item: Any) -> tree.Tree:
 
 # @to_tree.register # type: ignore 
 def matrix_to_tree(item: graph.Matrix) -> tree.Tree:
-    """Converts 'item' to a tree.Tree.
+    """Converts 'item' to a Tree.
     
     Args:
-        item (graph.Matrixy): item to convert to a tree.Tree.
+        item (graph.Matrixy): item to convert to a Tree.
 
     Raises:
         TypeError: if 'item' is a type that is not registered.

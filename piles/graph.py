@@ -1,5 +1,5 @@
 """
-graphs: lightweight graph data structures
+graph: lightweight graph data structures
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2021, Corey Rayburn Yung
 License: Apache-2.0
@@ -33,8 +33,7 @@ from collections.abc import (
 import copy
 import dataclasses
 import itertools
-from typing import (
-    Any, Callable, ClassVar, Optional, Type, TypeVar, TYPE_CHECKING, Union)
+from typing import Any, Optional, Type, TYPE_CHECKING, Union
 
 import bunches
 
@@ -45,7 +44,7 @@ from . import convert
 from . import hybrid
 
 if TYPE_CHECKING:
-    from . import array
+    from . import hybrid
     from . import tree
     
  
@@ -109,9 +108,9 @@ class Adjacency(bunches.Dictionary, Graph):
     """Base class for adjacency-list-based graphs.
     
     Args:
-        contents (MutableMapping[base.Node, Set[base.Node]]): keys are nodes and values 
-            are sets of nodes (or hashable representations of nodes). Defaults 
-            to a defaultdict that has a set for its value format.
+        contents (MutableMapping[base.Node, Set[base.Node]]): keys are nodes and 
+            values are sets of nodes (or hashable representations of nodes). 
+            Defaults to a defaultdict that has a set for its value format.
                                       
     """  
     contents: MutableMapping[base.Node, Set[base.Node]] = dataclasses.field(
@@ -151,8 +150,8 @@ class Matrix(Graph):
         contents (Sequence[Sequence[int]]): a list of list of integers 
             indicating edges between nodes in the matrix. Defaults to an empty
             list.
-        labels (Sequence[base.Node]): names of nodes in the matrix. Defaults to an 
-            empty list.
+        labels (Sequence[base.Node]): names of nodes in the matrix. Defaults to 
+            an empty list.
                                       
     """  
     contents: Sequence[Sequence[int]] = dataclasses.field(
@@ -171,13 +170,13 @@ class System(Adjacency):
     """Directed graph with unweighted edges.
     
     Args:
-        contents (MutableMapping[Hashable, Set[Hashable]]): keys are nodes and
-            values are sets of nodes (or hashable representations of nodes).
-            Defaults to an empty dict.    
+        contents (MutableMapping[base.Node, Set[base.Node]]): keys are nodes and 
+            values are sets of nodes (or hashable representations of nodes). 
+            Defaults to a defaultdict that has a set for its value format.
                   
     """  
-    contents: MutableMapping[Hashable, Set[Hashable]] = dataclasses.field(
-        default_factory = dict)
+    contents: MutableMapping[base.Node, Set[base.Node]] = dataclasses.field(
+        default_factory = lambda: collections.defaultdict(set))
     
     """ Properties """
 
@@ -214,20 +213,20 @@ class System(Adjacency):
 
     @property
     def paths(self) -> base.Nodes:
-        """Returns all paths through the stored as a list of Nodes."""
+        """Returns all paths through the stored as a list of nodes."""
         return self._find_all_paths(starts = self.root, stops = self.endpoint)
     
     @property
     def pipeline(self) -> hybrid.Pipeline:
-        """Returns stored graph as a hybrid.Pipeline."""
-        raise NotImplementedError
+        """Returns stored graph as a pipeline."""
+        raise itertools.chain(self.pipelines)
     
     @property
     def pipelines(self) -> hybrid.Pipelines:
-        """Returns stored graph as a hybrid.Pipelines."""
+        """Returns stored graph as pipelines."""
         all_paths = self.paths
-        instances = [hybrid.Process(contents = p) for p in all_paths]
-        return hybrid.Processes(contents = instances)
+        instances = [hybrid.Pipeline(contents = p) for p in all_paths]
+        return hybrid.Pipeline(contents = instances)
             
     @property
     def tree(self) -> tree.Tree:
@@ -259,13 +258,13 @@ class System(Adjacency):
 
     @classmethod
     def from_pipeline(cls, item: hybrid.Pipeline) -> System:
-        """Creates a System instance from a hybrid.Pipeline."""
+        """Creates a System instance from a Pipeline."""
         new_contents = convert.pipeline_to_adjacency(item = item)
         return cls(contents = new_contents)
     
     @classmethod
     def from_pipelines(cls, item: hybrid.Pipelines) -> System:
-        """Creates a System instance from a hybrid.Pipeline."""
+        """Creates a System instance from a Pipeline."""
         new_contents = convert.pipelines_to_adjacency(item = item)
         return cls(contents = new_contents)
 
@@ -348,9 +347,7 @@ class System(Adjacency):
                 for root in new_graph.root:
                     self.connect(start = endpoint, stop = root)
         else:
-            raise TypeError(
-                'item must be a System, Adjacency, Edges, Matrix, hybrid.Pipeline, '
-                'hybrid.Pipelines, or Node type')
+            raise TypeError('item must be a Node, Nodes, or Composite type')
         return
   
     def connect(self, start: base.Node, stop: base.Node) -> None:
@@ -431,17 +428,15 @@ class System(Adjacency):
         elif isinstance(item, Adjacency):
             adjacency = item
         elif isinstance(item, Edges):
-            adjacency = edges_to_adjacency(item = item)
+            adjacency = convert.edges_to_adjacency(item = item)
         elif isinstance(item, Matrix):
-            adjacency = matrix_to_adjacency(item = item)
+            adjacency = convert.matrix_to_adjacency(item = item)
         elif isinstance(item, (list, tuple, set)):
-            adjacency = pipeline_to_adjacency(item = item)
+            adjacency = convert.pipeline_to_adjacency(item = item)
         elif isinstance(item, base.Node):
             adjacency = {item: set()}
         else:
-            raise TypeError(
-                'item must be a System, Adjacency, Edges, Matrix, hybrid.Pipeline, '
-                'hybrid.Pipelines, or Node type')
+            raise TypeError('item must be a Node, Nodes, or Composite type')
         self.contents.update(adjacency)
         return
 
@@ -758,7 +753,7 @@ class System(Adjacency):
     
 #     @classmethod
 #     def from_pipeline(cls, pipeline: hybrid.Pipeline) -> Graph:
-#         """Creates a Graph instance from a hybrid.Pipeline.
+#         """Creates a Graph instance from a Pipeline.
 
 #         Args:
 #             pipeline (hybrid.Pipeline): serial pipeline used to create a Graph
@@ -1060,7 +1055,7 @@ class System(Adjacency):
 #         queue = [node]
 #         while queue:
 #             vertex = queue.pop(0)
-#             if vertex not in visited:
+#             if base. not in visited:
 #                 visited.add(vertex)
 #                 queue.extend(set(self[vertex]) - visited)
 #         return list(visited)

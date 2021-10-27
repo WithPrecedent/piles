@@ -20,7 +20,7 @@ Classes:
     
           
 To Do:
-
+    Add methods needed for Composite subclassing.
     
 """
 from __future__ import annotations

@@ -1,12 +1,10 @@
 """
-test_structures: unit tests for piles structures
+test_piles: unit tests for piles data structures
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2020-2021, Corey Rayburn Yung
 License: Apache-2.0 (https://www.apache.org/licenses/LICENSE-2.0)
 """
 import dataclasses
-import inspect 
-import types
 
 import piles
 

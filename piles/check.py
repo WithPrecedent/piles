@@ -1,5 +1,5 @@
 """
-checks: type checking functions for composite data structures
+check: type checking functions for composite data structures
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2021, Corey Rayburn Yung
 License: Apache-2.0
@@ -20,11 +20,7 @@ Contents:
     
           
 To Do:
-    Add a full Edge class with seamless support for it in Graph to allow for 
-        weights, direction, and other edge attributes.
-    Integrate ashford Kinds system when it is finished.
-    Add in 'beautify' str representations from amos once those are finished.
-    Add in 'dispatcher' decorators to the converter functions.
+
     
 """
 from __future__ import annotations
@@ -233,3 +229,4 @@ def is_forest(item: object) -> bool:
         isinstance(item, MutableMapping)
         and all(isinstance(i, Hashable) for i in item.keys())
         and all(is_tree(item = i) for i in item.values())) 
+    

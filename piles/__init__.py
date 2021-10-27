@@ -53,13 +53,11 @@ __package__ = 'piles'
 
 __author__ = 'Corey Rayburn Yung'
 
-
+import check
+import convert
 from .utilities import *
-from .check import *
 from .tracking import *
-from .convert import *
 from .base import *
-from .vertex import *
 from .hybrid import *
 from .graph import *
 from .tree import *

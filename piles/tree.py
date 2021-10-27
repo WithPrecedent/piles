@@ -32,14 +32,13 @@ from typing import Any, Callable, ClassVar, Optional, Type, TypeVar, Union
 import bunches
 
 from . import base
-from . import vertex
 from . import utilities
 
 
 """ Type Aliases """
 
-Changer: Type[Any] = Callable[[vertex.Node], None]
-Finder: Type[Any] = Callable[[vertex.Node], Optional[vertex.Node]]
+Changer: Type[Any] = Callable[[base.Node], None]
+Finder: Type[Any] = Callable[[base.Node], Optional[base.Node]]
 
 
 @dataclasses.dataclass # type: ignore
@@ -171,7 +170,7 @@ class Categorizer(Tree):
     """Base class for an tree data structures.
         
     Args:
-        contents (MutableSequence[vertex.Node]): list of stored Node 
+        contents (MutableSequence[base.Node]): list of stored Node 
             instances (including other Trees). Defaults to an empty list.
         name (Optional[str]): name of Tree node which should match a parent 
             tree's key name corresponding to this Tree node. All nodes in a Tree
@@ -181,7 +180,7 @@ class Categorizer(Tree):
         parent (Optional[Tree]): parent Tree, if any. Defaults to None.
         
     """
-    contents: MutableSequence[vertex.Node] = dataclasses.field(
+    contents: MutableSequence[base.Node] = dataclasses.field(
         default_factory = list)
     name: Optional[str] = None
     parent: Optional[Tree] = None 
@@ -194,11 +193,11 @@ class Categorizer(Tree):
         return self.nodes - self.leaves
     
     @property
-    def children(self) -> dict[str, vertex.Node]:
+    def children(self) -> dict[str, base.Node]:
         """[summary]
 
         Returns:
-            dict[str, vertex.Node]: [description]
+            dict[str, base.Node]: [description]
         """
         return self.contents
     
@@ -221,7 +220,7 @@ class Categorizer(Tree):
         return self.parent is None
     
     @property
-    def leaves(self) -> list[vertex.Node]:
+    def leaves(self) -> list[base.Node]:
         """Returns all stored leaf nodes in a list."""
         matches = []
         for node in self.nodes:
@@ -230,7 +229,7 @@ class Categorizer(Tree):
         return matches
      
     @property
-    def nodes(self) -> list[vertex.Node]:
+    def nodes(self) -> list[base.Node]:
         """Returns all stored nodes in a list."""
         return depth_first_search(tree = self.contents)
 
@@ -250,7 +249,7 @@ class Categorizer(Tree):
     
     def add(
         self, 
-        item: Union[vertex.Node, Sequence[vertex.Node]],
+        item: Union[base.Node, Sequence[base.Node]],
         parent: Optional[str] = None) -> None:
         """Adds node(s) in item to 'contents'.
         
@@ -258,7 +257,7 @@ class Categorizer(Tree):
         node(s) is set to this Tree instance.
 
         Args:
-            item (Union[vertex.Node, Sequence[vertex.Node]]): node(s) to 
+            item (Union[base.Node, Sequence[base.Node]]): node(s) to 
                 add to the 'contents' attribute.
 
         Raises:
@@ -285,18 +284,18 @@ class Categorizer(Tree):
             parent_node.contents.append(item)
         return
     
-    def find(self, finder: Finder, **kwargs: Any) -> Optional[vertex.Node]:
+    def find(self, finder: Finder, **kwargs: Any) -> Optional[base.Node]:
         """Finds first matching node in Tree using 'finder'.
 
         Args:
-            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
+            finder (Callable[[base.Node], Optional[base.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
 
         Returns:
-            Optional[vertex.Node]: matching Node or None if no matching node 
+            Optional[base.Node]: matching Node or None if no matching node 
                 is found.
             
         """                  
@@ -309,15 +308,15 @@ class Categorizer(Tree):
     def find_add(
         self, 
         finder: Finder, 
-        item: vertex.Node, 
+        item: base.Node, 
         **kwargs: Any) -> None:
         """Finds first matching node in Tree using 'finder'.
 
         Args:
-            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
+            finder (Callable[[base.Node], Optional[base.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
-            item (vertex.Node): node to add to the 'contents' attribute of 
+            item (base.Node): node to add to the 'contents' attribute of 
                 the first node that meets criteria in 'finder'.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
@@ -326,7 +325,7 @@ class Categorizer(Tree):
             ValueError: if no matching node is found by 'finder'.
 
         Returns:
-            Optional[vertex.Node]: matching Node or None if no matching node 
+            Optional[base.Node]: matching Node or None if no matching node 
                 is found.
             
         """  
@@ -339,18 +338,18 @@ class Categorizer(Tree):
                 'finder')
         return
     
-    def find_all(self, finder: Finder, **kwargs: Any) -> list[vertex.Node]:
+    def find_all(self, finder: Finder, **kwargs: Any) -> list[base.Node]:
         """Finds all matching nodes in Tree using 'finder'.
 
         Args:
-            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
+            finder (Callable[[base.Node], Optional[base.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
 
         Returns:
-            list[vertex.Node]: matching nodes or an empty list if no 
+            list[base.Node]: matching nodes or an empty list if no 
                 matching node is found.
             
         """              
@@ -369,10 +368,10 @@ class Categorizer(Tree):
         """Finds matching nodes in Tree using 'finder' and applies 'changer'.
 
         Args:
-            finder (Callable[[vertex.Node], Optional[vertex.Node]]): 
+            finder (Callable[[base.Node], Optional[base.Node]]): 
                 function or other callable that returns a node if it meets 
                 certain criteria or otherwise returns None.
-            changer (Callable[[vertex.Node], None]): function or other 
+            changer (Callable[[base.Node], None]): function or other 
                 callable that modifies the found node.
             kwargs: keyword arguments to pass to 'finder' when examing each
                 node.
@@ -391,14 +390,14 @@ class Categorizer(Tree):
                 'found by finder')
         return
     
-    def get(self, item: str) -> Optional[vertex.Node]:
+    def get(self, item: str) -> Optional[base.Node]:
         """Finds first matching node in Tree match 'item'.
 
         Args:
             item (str): 
 
         Returns:
-            Optional[vertex.Node]: matching Node or None if no matching node 
+            Optional[base.Node]: matching Node or None if no matching node 
                 is found.
             
         """                  
@@ -424,22 +423,22 @@ class Categorizer(Tree):
 
     """ Dunder Methods """
 
-    def __add__(self, other: Union[composites.Composite]) -> None:
+    def __add__(self, other: Union[base.Composite]) -> None:
         """Adds 'other' to the stored tree using the 'append' method.
 
         Args:
-            other (Union[composites.Composite]): another Composite or supported
+            other (Union[base.Composite]): another Composite or supported
                 raw data structure.
             
         """
         self.append(item = other)     
         return 
 
-    def __radd__(self, other: Union[composites.Composite]) -> None:
+    def __radd__(self, other: Union[base.Composite]) -> None:
         """Adds 'other' to the stored tree using the 'prepend' method.
 
         Args:
-            other (Union[composites.Composite]): another Composite or supported
+            other (Union[base.Composite]): another Composite or supported
                 raw data structure.
             
         """

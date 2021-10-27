@@ -36,6 +36,7 @@ import itertools
 from typing import Any, Optional, Type, TYPE_CHECKING, Union
 
 import bunches
+import more_itertools
 
 from . import utilities
 from . import base
@@ -44,7 +45,6 @@ from . import convert
 from . import hybrid
 
 if TYPE_CHECKING:
-    from . import hybrid
     from . import tree
     
  
@@ -199,12 +199,12 @@ class System(Adjacency):
     @property
     def edges(self) -> Edges:
         """Returns the stored graph as an edge list."""
-        return utilities.adjacency_to_edges(item = self.contents)
+        return convert.adjacency_to_edges(item = self.contents)
     
     @property
     def matrix(self) -> Matrix:
         """Returns the stored graph as an adjacency matrix."""
-        return utilities.adjacency_to_matrix(item = self.contents)
+        return convert.adjacency_to_matrix(item = self.contents)
                       
     @property
     def nodes(self) -> set[base.Node]:
@@ -219,14 +219,20 @@ class System(Adjacency):
     @property
     def pipeline(self) -> hybrid.Pipeline:
         """Returns stored graph as a pipeline."""
-        raise itertools.chain(self.pipelines)
+        pipeline = []
+        for pipe in self.pipelines.values():
+            pipeline.extend(pipe)
+        return hybrid.Pipeline(contents = pipeline)
     
     @property
     def pipelines(self) -> hybrid.Pipelines:
         """Returns stored graph as pipelines."""
         all_paths = self.paths
         instances = [hybrid.Pipeline(contents = p) for p in all_paths]
-        return hybrid.Pipeline(contents = instances)
+        pipelines = hybrid.Pipelines()
+        for instance in instances:
+            pipelines.add(instance, name = 'path')
+        return pipelines
             
     @property
     def tree(self) -> tree.Tree:

@@ -32,6 +32,8 @@ def test_graph() -> None:
     dag = piles.System.create(item = edges)
     dag.add(node = 'cat')
     dag.add(node = 'dog', ancestors = 'e', descendants = ['cat'])
+    assert dag['dog'] == {'cat'}
+    assert dag['e'] == {'dog'}
     adjacency = {
         'tree': {'house', 'yard'},
         'house': set(),
@@ -39,7 +41,18 @@ def test_graph() -> None:
     assert piles.Adjacency.__instancecheck__(adjacency)
     another_dag = piles.System.create(item = adjacency)
     dag.append(item = another_dag)
-    print('test print dag', dag)
+    assert dag['cat'] == {'tree'}
+    pipelines = dag.pipelines 
+    assert len(pipelines) == 6
+    assert dag.endpoint == {'house', 'yard'}
+    assert dag.root == {'a', 'c'}
+    assert dag.nodes == {
+        'tree', 'b', 'c', 'a', 'yard', 'cat', 'd', 'house', 'dog', 'e'}
+    pipeline = dag.pipeline
+    new_dag = piles.System.from_pipeline(item = pipeline)
+    assert new_dag['tree'] == dag['tree']
+    another_dag = piles.System.from_pipelines(item = pipelines)
+    assert another_dag['tree'] == dag['tree']
     return
 
 def test_pipeline() -> None:

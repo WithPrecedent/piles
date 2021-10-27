@@ -22,6 +22,7 @@ Contents:
 To Do:
     Complete functions that are presently not implemented.
     Add in 'dispatcher' decorators to the converter functions.
+    Fix 'adjacency_to_matrix' - it currently returns all zeros in the matrix.
     
 """
 from __future__ import annotations
@@ -36,6 +37,7 @@ import more_itertools
 from . import check
    
 if TYPE_CHECKING:
+    from . import base
     from . import graph
     from . import hybrid
     from . import tree
@@ -130,7 +132,10 @@ def pipeline_to_adjacency(item: hybrid.Pipeline) -> graph.Adjacency:
     else:
         edges = more_itertools.windowed(item, 2)
         for edge_pair in edges:
-            adjacency[edge_pair[0]] = {edge_pair[1]}
+            if edge_pair[0] in adjacency:
+                adjacency[edge_pair[0]].add(edge_pair[1])
+            else:
+                adjacency[edge_pair[0]] = {edge_pair[1]}
     return adjacency
 
 # @to_adjacency.register # type: ignore 
@@ -146,7 +151,14 @@ def pipelines_to_adjacency(item: hybrid.Pipelines) -> graph.Adjacency:
     """
     adjacency = collections.defaultdict(set)
     for _, pipeline in item.items():
-        adjacency.update(pipeline_to_adjacency(item = pipeline))
+        pipe_adjacency = pipeline_to_adjacency(item = pipeline)
+        for key, value in pipe_adjacency.items():
+            if key in adjacency:
+                for inner_value in value:
+                    if inner_value not in adjacency:
+                        adjacency[key].add(inner_value)
+            else:
+                adjacency[key] = value
     return adjacency
 
 # @to_adjacency.register # type: ignore 
@@ -211,7 +223,7 @@ def adjacency_to_edges(item: graph.Adjacency) -> graph.Edges:
     edges = []
     for node, connections in item.items():
         for connection in connections:
-            edges.append(tuple(node, connection))
+            edges.append(tuple([node, connection]))
     return tuple(edges)
 
 # @amos.dispatcher   
@@ -252,7 +264,7 @@ def adjacency_to_matrix(item: graph.Adjacency) -> graph.Matrix:
         matrix.append([0] * len(item))
         for j in item[i]:
             matrix[i][j] = 1
-    return tuple(matrix, names)    
+    return tuple([matrix, names])    
 
 # @amos.dispatcher   
 def to_tree(item: Any) -> tree.Tree:

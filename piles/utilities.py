@@ -52,6 +52,28 @@ Signatures = MutableMapping[str, inspect.Signature]
 # Alias for dict of Type[Any] types.
 Types = MutableMapping[str, Type[Any]]
 
+
+def uniquify(item: str, dictionary: MutableMapping[Hashable, Any]) -> str:
+    """Creates a unique key name to avoid overwriting an item in 'dictionary'.
+    
+    The function is 1-indexed so that the first attempt to avoid a duplicate
+    will be: "old_name2".
+
+    Args:
+        
+
+    Returns:
+
+    """
+    counter = 1
+    while True:
+        counter += 1
+        if counter > 2:
+            name = name.removesuffix(str(counter - 1))
+        name = ''.join([item, str(counter)])
+        if name not in dictionary:
+            return name
+            
 def drop_dunders(item: list[Any]) -> list[Any]:
     """Drops items in 'item' with names beginning with an underscore.
 

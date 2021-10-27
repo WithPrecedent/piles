@@ -34,7 +34,7 @@ import bunches
 
 from . import base
 from . import check
- 
+from . import utilities
  
 @dataclasses.dataclass # type: ignore
 class Pipeline(bunches.Hybrid, base.Composite, abc.ABC):
@@ -47,6 +47,75 @@ class Pipeline(bunches.Hybrid, base.Composite, abc.ABC):
     """
     contents: MutableSequence[base.Node] = dataclasses.field(
         default_factory = list)
+
+    """ Properties """
+
+    def endpoint(self) -> base.Node:
+        """Returns the endpoint of the stored composite object."""
+        return self.contents[-1]
+
+    def root(self) -> base.Node:
+        """Returns the root of the stored composite object."""
+        return self.contents[0]
+    
+    """ Public Methods """
+        
+    def delete(self, item: Any) -> None:
+        """Deletes node from the stored composite object.
+        
+        Args:
+            item (Any): node or key to the a node to delete.
+        
+        Raises:
+            KeyError: if 'item' is not in 'contents'.
+            
+        """
+        self.__delitem__(item)
+  
+    def merge(self, item: base.Composite, *args: Any, **kwargs: Any) -> None:
+        """Combines 'item' with the stored composite object.
+
+        Args:
+            item (Composite): another Composite object to add to the stored 
+                composite object.
+                
+        """
+        pass
+   
+    def walk(
+        self, 
+        start: Optional[base.Node] = None,
+        stop: Optional[base.Node] = None, 
+        path: Optional[Pipeline] = None,
+        return_pipelines: bool = False, 
+        *args: Any, 
+        **kwargs: Any) -> Pipeline:
+        """Returns path in the stored composite object from 'start' to 'stop'.
+        
+        Args:
+            start (Optional[Node]): node to start paths from. Defaults to None.
+                If it is None, 'start' should be assigned to one of the roots
+                of the Composite.
+            stop (Optional[Node]): node to stop paths. Defaults to None. If it 
+                is None, 'start' should be assigned to one of the roots of the 
+                Composite.
+            path (Optional[hybrid.Pipeline]): a path from 'start' to 'stop'. 
+                Defaults to None. This parameter is used by recursive methods 
+                for determining a path.
+            return_pipelines (bool): whether to return a Pipelines instance 
+                (True) or a hybrid.Pipeline instance (False). Defaults to True.
+
+        Returns:
+            Union[hybrid.Pipeline, hybrid.Pipelines]: path(s) through the 
+                Composite object. If multiple paths are possible and 
+                'return_pipelines' is False, this method should return a 
+                Pipeline that includes all such paths appended to each other. If 
+                multiple paths are possible and 'return_pipelines' is True, a 
+                Pipelines instance with all of the paths should be returned. 
+                Defaults to True.
+                            
+        """
+        return self.contents
     
     """ Dunder Methods """
         
@@ -67,7 +136,110 @@ class Pipelines(bunches.Dictionary, base.Composite, abc.ABC):
     """
     contents: MutableMapping[Hashable, Pipeline] = dataclasses.field(
         default_factory = dict)
+
+    """ Properties """
+
+    def endpoint(self) -> Pipeline:
+        """Returns the endpoint of the stored composite object."""
+        return self.contents[list(self.contents.keys())[-1]]
+
+    def root(self) -> Pipeline:
+        """Returns the root of the stored composite object."""
+        self.contents[list(self.contents.keys())[0]]
     
+    """ Public Methods """
+    
+    def add(self, item: Pipeline, name: Optional[Hashable] = None) -> None:
+        """Adds 'node' to the stored composite object.
+        
+        Args:
+            node (Node): a node to add to the stored composite object.
+                
+        """
+        name = name or utilities.get_name(item = item)
+        if name in self.contents:
+            name = utilities.uniquify(item = name, dictionary = self.contents)            
+        self.contents[name] = item
+        return
+
+    def append(self, item: Pipeline, name: Optional[Hashable] = None) -> None:
+        """Appends 'item' to the endpoint(s) of the stored composite object.
+
+        Args:
+            item (Union[Node, Composite]): a single Node or other Composite
+                object to add to the stored composite object.
+                
+        """
+        self.add(item = item, name = name)
+        return
+        
+    def delete(self, item: Any) -> None:
+        """Deletes node from the stored composite object.
+        
+        Args:
+            item (Any): node or key to the a node to delete.
+        
+        Raises:
+            KeyError: if 'item' is not in 'contents'.
+            
+        """
+        self.__delitem__(item)
+  
+    def merge(item: base.Composite, *args: Any, **kwargs: Any) -> None:
+        """Combines 'item' with the stored composite object.
+
+        Args:
+            item (Composite): another Composite object to add to the stored 
+                composite object.
+                
+        """
+        pass
+    
+    def prepend(self, item: Pipeline, name: Optional[Hashable] = None) -> None:
+        """Prepends 'item' to the root(s) of the stored composite object.
+
+        Args:
+            item (Union[Node, Composite]): a single Node or other Composite
+                object to add to the stored composite object.
+                
+        """
+        pass
+
+    def walk(
+        self, 
+        start: Optional[base.Node] = None,
+        stop: Optional[base.Node] = None, 
+        path: Optional[Pipeline] = None,
+        return_pipelines: bool = True, 
+        *args: Any, 
+        **kwargs: Any) -> Union[Pipeline, Pipelines]:
+        """Returns path in the stored composite object from 'start' to 'stop'.
+        
+        Args:
+            start (Optional[Node]): node to start paths from. Defaults to None.
+                If it is None, 'start' should be assigned to one of the roots
+                of the Composite.
+            stop (Optional[Node]): node to stop paths. Defaults to None. If it 
+                is None, 'start' should be assigned to one of the roots of the 
+                Composite.
+            path (Optional[hybrid.Pipeline]): a path from 'start' to 'stop'. 
+                Defaults to None. This parameter is used by recursive methods 
+                for determining a path.
+            return_pipelines (bool): whether to return a Pipelines instance 
+                (True) or a hybrid.Pipeline instance (False). Defaults to True.
+
+        Returns:
+            Union[hybrid.Pipeline, hybrid.Pipelines]: path(s) through the 
+                Composite object. If multiple paths are possible and 
+                'return_pipelines' is False, this method should return a 
+                Pipeline that includes all such paths appended to each other. If 
+                multiple paths are possible and 'return_pipelines' is True, a 
+                Pipelines instance with all of the paths should be returned. 
+                Defaults to True.
+                            
+        """
+        return self.items()
+        
     """ Dunder Methods """
         
     @classmethod

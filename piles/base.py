@@ -22,7 +22,9 @@ Contents:
 To Do:
     Integrate ashford Kinds system when it is finished.
     Add in 'beautify' str representations from amos once those are finished.
-    
+    Add universal 'merge' method in Composite to replace the ad hoc methods of
+        subclasses. This requires completion of "To Do:" tasks in the 'convert'
+        module as well.
     
 """
 from __future__ import annotations
@@ -375,7 +377,7 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
     """ Required Subclass Methods """
     
     @abc.abstractmethod
-    def add(item: Node, *args: Any, **kwargs: Any) -> None:
+    def add(self, item: Node, *args: Any, **kwargs: Any) -> None:
         """Adds 'node' to the stored composite object.
         
         Args:
@@ -400,7 +402,7 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
         pass
         
     @abc.abstractmethod
-    def delete(item: Any, *args: Any, **kwargs: Any) -> None:
+    def delete(self, item: Any, *args: Any, **kwargs: Any) -> None:
         """Deletes node from the stored composite object.
         
         Args:
@@ -413,7 +415,7 @@ class Composite(tracking.RegistrarFactory, abc.ABC):
         pass
   
     @abc.abstractmethod
-    def merge(item: Composite, *args: Any, **kwargs: Any) -> None:
+    def merge(self, item: Composite, *args: Any, **kwargs: Any) -> None:
         """Combines 'item' with the stored composite object.
 
         Args:
